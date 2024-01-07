@@ -101,17 +101,17 @@ function setup_frontend() {
 		fi
 
 		# Read values from ~/values.json
-		if [ ! -f ~/values.json ]; then
+		if [ ! -f ~/home/ubuntu/setup-variables/const.json]; then
 			echo "values.json not found."
 			exit 1
 		fi
 
-		NEW_IP=$(jq -r '.new_ip' ~/values.json)
+		NEW_IP=$(jq -r '.new_ip' ~/home/ubuntu/setup-variables/const.json)
 		NEW_URL=$(jq -r '.new_url' ~/values.json)
 
 		# Ensure values are not empty
 		if [ -z "$NEW_IP" ] || [ -z "$NEW_URL" ]; then
-			echo "Missing values in ~/values.json"
+			echo "Missing values in ~/home/ubuntu/setup-variables/const.json"
 			exit 1
 		fi
 
@@ -127,8 +127,6 @@ function setup_frontend() {
 
 		# Using sed to replace lines in the file
 		$SED_CMD "s|export const PIXEL_STREAM_PUBLIC_IP = .*;|export const PIXEL_STREAM_PUBLIC_IP = \"ws://$NEW_IP:80\";|" "$FILE_PATH"
-		$SED_CMD "s|export const CONSTANT_BASE_URL = .*;|export const CONSTANT_BASE_URL = \"$NEW_URL\";|" "$FILE_PATH"
-
 		echo "Values have been updated in $FILE_PATH."
 
 		# Build the project
