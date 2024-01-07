@@ -32,7 +32,7 @@ def create_application_subdomain(ip_address):
                 'Changes': [{
                     'Action': 'CREATE',
                     'ResourceRecordSet': {
-                        'Name': domain,
+                        'Name': subdomain,
                         'Type': 'A',
                         'TTL': 300,
                         'ResourceRecords': [{'Value': ip_address}]
