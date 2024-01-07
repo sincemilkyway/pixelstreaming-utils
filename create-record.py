@@ -5,7 +5,7 @@ import string
 import argparse
 from botocore.exceptions import ClientError
 
-def create_application_subdomain(ip_address, domain, hosted_zone_id):
+def create_application_subdomain(ip_address, domain):
     """
     Creates an A record with a subdomain in the format 'applicationXXXXX' for the given IP address in AWS Route 53 using a specified AWS profile.
 
@@ -27,12 +27,12 @@ def create_application_subdomain(ip_address, domain, hosted_zone_id):
 
     try:
         response = client.change_resource_record_sets(
-            HostedZoneId=hosted_zone_id,
+            HostedZoneId='Z073250327MWUST5QNDHT',
             ChangeBatch={
                 'Changes': [{
                     'Action': 'CREATE',
                     'ResourceRecordSet': {
-                        'Name': full_domain_name,
+                        'Name': 'pcgamingbuilder.com',
                         'Type': 'A',
                         'TTL': 300,
                         'ResourceRecords': [{'Value': ip_address}]
@@ -58,13 +58,11 @@ def create_application_subdomain(ip_address, domain, hosted_zone_id):
 def main():
     parser = argparse.ArgumentParser(description='Replace values in a .ts file.')
     parser.add_argument('ip_address', type=str, help='IP address')
-    parser.add_argument('domain', type=str, help='Domain name')
-    parser.add_argument('hosted_zone_id', type=str, help='Hosted Zone ID')
 
     args = parser.parse_args()
-    print(args.ip_address, args.domain, args.hosted_zone_id)
+    print(args.ip_address)
 
-    return create_application_subdomain(args.ip_address, args.domain, args.hosted_zone_id)
+    return create_application_subdomain(args.ip_address)
 
 if __name__ == '__main__':
     main()
