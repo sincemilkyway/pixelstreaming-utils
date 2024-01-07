@@ -5,7 +5,7 @@ import string
 import argparse
 from botocore.exceptions import ClientError
 
-def create_application_subdomain(ip_address, domain):
+def create_application_subdomain(ip_address):
     """
     Creates an A record with a subdomain in the format 'applicationXXXXX' for the given IP address in AWS Route 53 using a specified AWS profile.
 
@@ -15,7 +15,7 @@ def create_application_subdomain(ip_address, domain):
     :param aws_profile: The AWS profile to use.
     :return: The name of the created subdomain.
     """
-
+    domain = "pcgamingbuilder.com"
     # Generate a random ID and prepend 'application'
     random_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=5))
     subdomain = f"application{random_id}"
@@ -32,7 +32,7 @@ def create_application_subdomain(ip_address, domain):
                 'Changes': [{
                     'Action': 'CREATE',
                     'ResourceRecordSet': {
-                        'Name': 'pcgamingbuilder.com',
+                        'Name': domain,
                         'Type': 'A',
                         'TTL': 300,
                         'ResourceRecords': [{'Value': ip_address}]
