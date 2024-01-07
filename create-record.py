@@ -40,7 +40,6 @@ def create_application_subdomain(ip_address):
                 }]
             }
         )
-        print(f"Record created: {full_domain_name} -> {ip_address}")
     except ClientError as e:
         print(f"An error occurred: {e}")
         return None
@@ -53,16 +52,10 @@ def create_application_subdomain(ip_address):
 # hosted_zone_id = "ZXXXXXXXXXXXXX"  # Replace with your Hosted Zone ID
 # aws_profile = "your-profile-name"  # Replace with your AWS profile name
 # create_random_subdomain(ip_address, domain, hosted_zone_id, aws_profile)
-
-
 def main():
     parser = argparse.ArgumentParser(description='Replace values in a .ts file.')
     parser.add_argument('ip_address', type=str, help='IP address')
-
     args = parser.parse_args()
-    print(args.ip_address)
-
     return create_application_subdomain(args.ip_address)
-
 if __name__ == '__main__':
     print(main())
