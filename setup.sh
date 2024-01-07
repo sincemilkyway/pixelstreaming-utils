@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright SEO CONTENT.AI, Inc. All Rights Reserved.
+# Copyright SEO CONTENT.AI V1, Inc. All Rights Reserved.
 BASH_LOCATION=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 pushd "${BASH_LOCATION}" > /dev/null
@@ -92,59 +92,61 @@ function setup_frontend() {
     pushd ${BASH_LOCATION}/../../.. > /dev/null
 
     # Update Node to the latest version and install TypeScript
-    curl -sL https://deb.nodesource.com/setup_current.x | sudo -E bash -
-    sudo apt-get install -y nodejs
     npm install -g typescript
+	if [ ! -f SignallingWebServer/Public/index.html ] || [ ! -z "$FORCE_BUILD" ] ; then
+        echo "Building from test-sourav-build repository."
+		# Clone the repository if it doesn't exist
+		if [ ! -d "test-sourav-build" ]; then
+			git clone https://github.com/uba2000/test-sourav-build.git
+		fi
 
-    # Clone the repository if it doesn't exist
-    if [ ! -d "test-sourav-build" ]; then
-        git clone https://github.com/uba2000/test-sourav-build.git
+		# Read values from ~/values.json
+		if [ ! -f ~/values.json ]; then
+			echo "values.json not found."
+			exit 1
+		fi
+
+		NEW_IP=$(jq -r '.new_ip' ~/values.json)
+		NEW_URL=$(jq -r '.new_url' ~/values.json)
+
+		# Ensure values are not empty
+		if [ -z "$NEW_IP" ] || [ -z "$NEW_URL" ]; then
+			echo "Missing values in ~/values.json"
+			exit 1
+		fi
+
+		# File path for the constants file
+		FILE_PATH="test-sourav-build/src/lib/utils/util-constants.ts"
+
+		# Determine OS type for sed command compatibility
+		case "$(uname)" in
+			"Linux" ) SED_CMD="sed -i";;
+			"Darwin" ) SED_CMD="sed -i ''";;
+			* ) echo "Unsupported OS"; exit 1;;
+		esac
+
+		# Using sed to replace lines in the file
+		$SED_CMD "s|export const PIXEL_STREAM_PUBLIC_IP = .*;|export const PIXEL_STREAM_PUBLIC_IP = \"ws://$NEW_IP:80\";|" "$FILE_PATH"
+		$SED_CMD "s|export const CONSTANT_BASE_URL = .*;|export const CONSTANT_BASE_URL = \"$NEW_URL\";|" "$FILE_PATH"
+
+		echo "Values have been updated in $FILE_PATH."
+
+		# Build the project
+		pushd test-sourav-build > /dev/null
+		npm install
+		npm run build
+		popd
+
+		# Clear the destination directory
+		rm -rf ~/Linux/PC_Build_Export/Samples/PixelStreaming/WebServers/SignallingWebServer/Public/*
+
+		# Copy new build to the destination
+		cp -r test-sourav-build/dist/* ~/Linux/PC_Build_Export/Samples/PixelStreaming/WebServers/SignallingWebServer/Public/
+
+		echo "Frontend build complete and files copied."
+	else
+        echo 'Skipping build. Index.html exists. Use "--build" to force rebuild.'
     fi
-
-    # Read values from ~/values.json
-    if [ ! -f ~/values.json ]; then
-        echo "values.json not found."
-        exit 1
-    fi
-
-    NEW_IP=$(jq -r '.new_ip' ~/values.json)
-    NEW_URL=$(jq -r '.new_url' ~/values.json)
-
-    # Ensure values are not empty
-    if [ -z "$NEW_IP" ] || [ -z "$NEW_URL" ]; then
-        echo "Missing values in ~/values.json"
-        exit 1
-    fi
-
-    # File path for the constants file
-    FILE_PATH="test-sourav-build/src/lib/utils/util-constants.ts"
-
-    # Determine OS type for sed command compatibility
-    case "$(uname)" in
-        "Linux" ) SED_CMD="sed -i";;
-        "Darwin" ) SED_CMD="sed -i ''";;
-        * ) echo "Unsupported OS"; exit 1;;
-    esac
-
-    # Using sed to replace lines in the file
-    $SED_CMD "s|export const PIXEL_STREAM_PUBLIC_IP = .*;|export const PIXEL_STREAM_PUBLIC_IP = \"ws://$NEW_IP:80\";|" "$FILE_PATH"
-    $SED_CMD "s|export const CONSTANT_BASE_URL = .*;|export const CONSTANT_BASE_URL = \"$NEW_URL\";|" "$FILE_PATH"
-
-    echo "Values have been updated in $FILE_PATH."
-
-    # Build the project
-    pushd test-sourav-build > /dev/null
-    npm install
-    npm run build
-    popd
-
-    # Clear the destination directory
-    rm -rf ~/Linux/PC_Build_Export/Samples/PixelStreaming/WebServers/SignallingWebServer/Public/*
-
-    # Copy new build to the destination
-    cp -r test-sourav-build/dist/* ~/Linux/PC_Build_Export/Samples/PixelStreaming/WebServers/SignallingWebServer/Public/
-
-    echo "Frontend build complete and files copied."
 
     popd > /dev/null # return to root
 }
