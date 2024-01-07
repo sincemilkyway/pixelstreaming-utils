@@ -25,7 +25,7 @@ python3.10 -m pip install -r requirements.txt
 current_public_ip=$(curl http://checkip.amazonaws.com)
 
 # Run the create-record.py script and capture the new URL
-new_url=$(python3.10 create-record.py -ip_address=$current_public_ip domain=pcgamingbuilder.com hosted_zone_id=Z073250327MWUST5QNDHT)
+new_url=$(python3.10 create-record.py $current_public_ip)
 
 # Replace the setup.sh file
 sudo cp setup.sh /home/ubuntu/Linux/PC_Build_Export/Samples/PixelStreaming/WebServers/SignallingWebServer/platform_scripts/bash/setup.sh

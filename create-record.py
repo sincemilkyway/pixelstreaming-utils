@@ -65,4 +65,4 @@ def main():
     return create_application_subdomain(args.ip_address)
 
 if __name__ == '__main__':
-    main()
+    print(main())
